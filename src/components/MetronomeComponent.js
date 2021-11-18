@@ -130,7 +130,6 @@ function MetronomeComponent(props) {
 
   return (
     <div className="MetronomeComponent">
-      <div id="version">Metronome v1.0</div>
       <div id="bpm-info">{BPM} <span style={{fontSize: "12px", fontWeight: "normal"}}>BPM</span></div>
       <div id="slider-and-buttons">
         <>
