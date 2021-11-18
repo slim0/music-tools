@@ -9,42 +9,44 @@ import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled'
 import './MetronomeComponent.scss'
 
 class Metronome {  // Thanks to https://github.com/grantjames/metronome.git
-  constructor(tempo, pulsation) {
+  constructor(tempo, beatPerMeasure) {
     this.audioContext = null
-    this.notesInQueue = []         // notes that have been put into the web audio and may or may not have been played yet {note, time}
-    this.currentQuarterNote = 0
+    this.notesInQueue = []  // notes that have been put into the web audio and may or may not have been played yet {note, time}
+    this.currentNote = 0
+    this.beatPerMeasure = beatPerMeasure
     this.tempo = tempo
-    this.pulsation = pulsation
-    this.lookahead = 25          // How frequently to call scheduling function (in milliseconds)
-    this.scheduleAheadTime = 0.1   // How far ahead to schedule audio (sec)
-    this.nextNoteTime = 0.0     // when the next note is due
+    this.lookahead = 25  // How frequently to call scheduling function (in milliseconds)
+    this.scheduleAheadTime = 0.1  // How far ahead to schedule audio (sec)
+    this.nextNoteTime = 0.0  // when the next note is due
     this.isRunning = false
     this.intervalID = null
+    this.beatPerTime = 3
   }
 
   nextNote() {
       // Advance current note and time by a quarter note (crotchet if you're posh)
-      console.log(this.tempo)
-      var secondsPerBeat = 60.0 / this.tempo // Notice this picks up the CURRENT tempo value to calculate beat length.
+      var secondsPerBeat = 60.0 / this.tempo / this.beatPerTime // Notice this picks up the CURRENT tempo value to calculate beat length.
       this.nextNoteTime += secondsPerBeat // Add beat length to last beat time
   
-      this.currentQuarterNote++    // Advance the beat number, wrap to zero
-      if (this.currentQuarterNote === 4) {
-          this.currentQuarterNote = 0
+      this.currentNote++    // Advance the beat number, wrap to zero
+      if (this.currentNote === (this.beatPerMeasure * this.beatPerTime)) {
+          this.currentNote = 0
       }
   }
 
-  scheduleNote(beatNumber, time) {
+  scheduleNote(time) {
       // push the note on the queue, even if we're not playing.
-      this.notesInQueue.push({ note: beatNumber, time: time })
+      this.notesInQueue.push({ note: this.currentNote, time: time })
   
       // create an oscillator
       const osc = this.audioContext.createOscillator()
       const envelope = this.audioContext.createGain()
       
-      osc.frequency.value = (beatNumber % 4 === 0) ? 1000 : 800  // 1000 frequency at the first time !
-      envelope.gain.value = 1
-      envelope.gain.exponentialRampToValueAtTime(1, time + 0.001)
+      osc.frequency.value = (this.currentNote % (this.beatPerMeasure * this.beatPerTime) === 0) ? 1000 : 800  // 1000 frequency at the first beat per measure !
+
+      let volume = (this.currentNote % (this.beatPerTime) === 0) ? 1 : 0.3
+      envelope.gain.value = volume
+      envelope.gain.exponentialRampToValueAtTime(volume, time + 0.001)
       envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.02)
 
       osc.connect(envelope)
@@ -57,7 +59,7 @@ class Metronome {  // Thanks to https://github.com/grantjames/metronome.git
   scheduler() {
       // while there are notes that will need to play before the next interval, schedule them and advance the pointer.
       while (this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime ) {
-          this.scheduleNote(this.currentQuarterNote, this.nextNoteTime)
+          this.scheduleNote(this.nextNoteTime)
           this.nextNote()
       }
   }
@@ -72,7 +74,7 @@ class Metronome {  // Thanks to https://github.com/grantjames/metronome.git
 
       this.isRunning = true
 
-      this.currentQuarterNote = 0
+      this.currentNote = 0
       this.nextNoteTime = this.audioContext.currentTime + 0.05
 
       this.intervalID = setInterval(() => this.scheduler(), this.lookahead)
@@ -101,13 +103,15 @@ function MetronomeComponent(props) {
     maxBpmValue = 250, 
     defaultBpmValue = 120, 
     stepBPM = 1, 
-    defaultPulsation = 4  // 4: Binaire car on va jusqu'à un découpage de 4 temps pas mesure (possible d'augmenter)
+    defaultPulsation = 4,  // 4: Binaire car on va jusqu'à un découpage de 4 temps pas mesure (possible d'augmenter)
+    defaulBeatPerMeasure = 4
 
   const [BPM, setBPM] = useState(defaultBpmValue)
   const [pulsation, setPulsation] = useState(defaultPulsation)
+  const [beatPerMeasure, setBeatPerMeasure] = useState(defaulBeatPerMeasure)
   const [isPlaying, setIsPlaying] = useState(false)
 
-  const [metronomeRunner] = useState(new Metronome(BPM, pulsation))
+  const [metronomeRunner] = useState(new Metronome(BPM, beatPerMeasure))
 
   function onPlayPause(oldPlayingState) {
     setIsPlaying(!isPlaying)  // New Playing state
