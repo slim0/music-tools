@@ -9,7 +9,7 @@ import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled'
 import './MetronomeComponent.scss'
 
 class Metronome {  // Thanks to https://github.com/grantjames/metronome.git
-  constructor(tempo, beatPerMeasure) {
+  constructor(tempo, beatPerMeasure, beatPerTime) {
     this.audioContext = null
     this.notesInQueue = []  // notes that have been put into the web audio and may or may not have been played yet {note, time}
     this.currentNote = 0
@@ -20,7 +20,7 @@ class Metronome {  // Thanks to https://github.com/grantjames/metronome.git
     this.nextNoteTime = 0.0  // when the next note is due
     this.isRunning = false
     this.intervalID = null
-    this.beatPerTime = 3
+    this.beatPerTime = beatPerTime
   }
 
   nextNote() {
@@ -102,16 +102,16 @@ function MetronomeComponent(props) {
     minBpmValue = 30, 
     maxBpmValue = 250, 
     defaultBpmValue = 120, 
-    stepBPM = 1, 
-    defaultPulsation = 4,  // 4: Binaire car on va jusqu'à un découpage de 4 temps pas mesure (possible d'augmenter)
-    defaulBeatPerMeasure = 4
+    stepBPM = 1,
+    defaulBeatPerMeasure = 4,  // 1 mesure = 4 temps
+    defaulBeatPerTime = 4  // 1: noire, 2: croche, 3:triolet, 4: double-croches ...
 
   const [BPM, setBPM] = useState(defaultBpmValue)
-  const [pulsation, setPulsation] = useState(defaultPulsation)
   const [beatPerMeasure, setBeatPerMeasure] = useState(defaulBeatPerMeasure)
+  const [beatPerTime, setBeatPerTime] = useState(defaulBeatPerTime)
   const [isPlaying, setIsPlaying] = useState(false)
 
-  const [metronomeRunner] = useState(new Metronome(BPM, beatPerMeasure))
+  const [metronomeRunner] = useState(new Metronome(BPM, beatPerMeasure, beatPerTime))
 
   function onPlayPause(oldPlayingState) {
     setIsPlaying(!isPlaying)  // New Playing state
