@@ -1,0 +1,42 @@
+.MetronomeComponent {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  padding: 20px;
+  margin: 15px;
+  border: solid;
+  border-width: 1px;
+  border-radius: 20px;
+  border-color: grey;
+
+  #version {
+    font-size: 10px;
+    text-align: left;
+  }
+  
+  #bpm-info {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  #slider-and-buttons {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .change-bpm-button {
+    position: relative;
+    bottom: 5px;
+
+    .left {
+      margin-right: 10px;
+    }
+
+    .right {
+      margin-left: 10px;
+    }
+  }
+
+}
