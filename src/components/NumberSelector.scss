@@ -1,0 +1,19 @@
+@import "../global.scss";
+
+.NumberSelector {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 40px;
+
+  .button-controller {
+    &.increase {
+      position: relative;
+      bottom: -3px;
+    }
+    &.decrease {
+      position: relative;
+      bottom: 3px;
+    }
+  }
+}

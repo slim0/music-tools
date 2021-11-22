@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import MetronomeComponent from './components/MetronomeComponent';
+import './index.scss';
+import Metronome  from './components/Metronome';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <MetronomeComponent />
+    <Metronome beatPerMeasure={4}/>
   </React.StrictMode>,
   document.getElementById('root')
 );

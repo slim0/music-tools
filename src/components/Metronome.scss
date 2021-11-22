@@ -1,17 +1,25 @@
-.MetronomeComponent {
+@import "../global.scss";
+
+.Metronome {
   text-align: center;
   display: flex;
   flex-direction: column;
   width: 300px;
   margin: 5px;
+  padding: 10px;
   border: solid;
   border-width: 1px;
   border-radius: 20px;
-  border-color: grey;
+  border-color: #aaa;
+  box-shadow: 2px 2px 10px #aaa;
+
+  .metronome-slider{
+    color: $global-primary
+  }
   
   #bpm-info {
     padding-top: 5px;
-    padding-bottom: 5px;
+    padding-bottom: 10px;
     font-weight: bold;
   }
   
