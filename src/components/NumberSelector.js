@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import IconButton from '@mui/material/IconButton'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import PropTypes from 'prop-types';
 
 import './NumberSelector.scss'
@@ -44,14 +44,14 @@ function NumberSelector(props) {
 
   return (
     <div className="NumberSelector">
-      <IconButton className="button-controller increase-button" size="small" aria-label="increase" onClick={() => setNumberUp()}>
-        <KeyboardArrowUpIcon fontSize="small"/>
+      <IconButton disableRipple={true} className="button-controller decrease-button" size="small" aria-label="decrease" onClick={() => setNumberDown()}>
+        <KeyboardArrowLeftIcon fontSize="small"/>
       </IconButton>
-
+      
       <div className="number">{currentNumber}</div>
 
-      <IconButton className="button-controller decrease-button" size="small" aria-label="decrease" onClick={() => setNumberDown()}>
-        <KeyboardArrowDownIcon fontSize="small"/>
+      <IconButton disableRipple={true} className="button-controller increase-button" size="small" aria-label="increase" onClick={() => setNumberUp()}>
+        <KeyboardArrowRightIcon fontSize="small"/>
       </IconButton>
     </div>
   )

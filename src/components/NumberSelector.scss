@@ -1,19 +1,20 @@
 @import "../global.scss";
 
 .NumberSelector {
-  text-align: center;
+  align-items: center;
   display: flex;
-  flex-direction: column;
-  width: 40px;
+  flex-direction: row;
+
+  .number {
+    width: 20px;
+  }
 
   .button-controller {
     &.increase {
-      position: relative;
-      bottom: -3px;
+      margin-left: 2px;
     }
     &.decrease {
-      position: relative;
-      bottom: 3px;
+      margin-right: 2px;
     }
   }
 }

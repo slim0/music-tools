@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Metronome beatPerMeasure={4}/>
+    <Metronome beatPerMeasure={4} beatPerTime={1}/>
   </React.StrictMode>,
   document.getElementById('root')
 );
