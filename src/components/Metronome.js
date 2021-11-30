@@ -7,7 +7,6 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled'
 import CircleIcon from '@mui/icons-material/Circle';
 import NumberSelector from './NumberSelector'
-import {} from "../global.scss";
 
 import './Metronome.scss'
 
@@ -17,6 +16,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
 
     this.intervalID = undefined
     this.audioContext = undefined
+    this.tapTempo = undefined
     
     this.state = {
       minBpmValue: props.minBpmValue || 30,
@@ -30,17 +30,21 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
       lookahead: 25,
       scheduleAheadTime: 0.1, // How far ahead to schedule audio (sec)
       nextBeatTime: 0.0, // when the next note is due
-      tapTempo: undefined
     }
   }
 
   componentWillUnmount() {
-    if (this.audioContext && this.audioContext.state === "running") {
-      this.audioContext.close()
+    console.log("componentWillUnmount")
+    this.audioContext.close()
+  }
+
+  startAudioCtx = () => {
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
     }
   }
 
-  nextNote() {
+  nextNote = () => {
     // Advance current note and time by a quarter note (crotchet if you're posh)
     var secondsPerBeat = 60.0 / this.state.BPM // Notice this picks up the CURRENT tempo value to calculate beat length.
     this.setState({nextBeatTime: this.state.nextBeatTime + secondsPerBeat}) // Add beat length to last beat time
@@ -51,7 +55,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
     }
   }
 
-  playNote(frequency, volume, time) {
+  playNote = (frequency, volume, time) => {
     const osc = this.audioContext.createOscillator()
     const envelope = this.audioContext.createGain()
     osc.frequency.value = frequency
@@ -64,7 +68,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
     osc.stop(time + 0.03)
   }
 
-  scheduleNote(time) {
+  scheduleNote = (time) => {
     const frequency = (this.state.currentNote % (this.state.beatPerMeasure) === 0) ? 1000 : 800 // 1000 frequency at the first beat per measure !
     let volume = 1
     this.playNote(frequency, volume, time)
@@ -82,7 +86,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
 
   }
 
-  scheduler() {
+  scheduler = () => {
     // while there are notes that will need to play before the next interval, schedule them and advance the pointer.
     while (this.state.nextBeatTime < this.audioContext.currentTime + this.state.scheduleAheadTime) {
       this.scheduleNote(this.state.nextBeatTime)
@@ -90,17 +94,13 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
     }
   }
 
-  startStop() {
+  startStop = () => {
     if (this.state.isPlaying) {
-      this.audioContext.close() // STOP
       this.setState({isPlaying: false})
       clearInterval(this.intervalID)
     }
     else {  // START
-      if (!this.audioContext || this.audioContext.state === "closed") {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
-      }
-
+      this.startAudioCtx()
       this.setState({
         isPlaying: true,
         currentNote:  0,
@@ -111,7 +111,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
     }
   }
 
-  onChangeBpmButton(action) {
+  onChangeBpmButton = (action) => {
     if (action === "decrease") {
       if (this.state.BPM - this.state.stepBPM >= this.state.minBpmValue) {
         this.setState({BPM: this.state.BPM - this.state.stepBPM})
@@ -123,28 +123,27 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
     }
   }
 
-  onChangeBeatPerMeasure(newBeatPerMeasure) {
+  onChangeBeatPerMeasure = (newBeatPerMeasure) => {
     this.setState({beatPerMeasure: newBeatPerMeasure})
   }
 
-  onChangeBeatPerTime(newBeatPerTime) {
+  onChangeBeatPerTime = (newBeatPerTime) => {
     this.setState({beatPerTime: newBeatPerTime})
   }
 
-  setTapTempo() {
-    if (this.state.tapTempo === undefined) {
-      if (!this.audioContext || this.audioContext.state === "closed") {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
-      }
-      this.setState({ tapTempo: this.audioContext.currentTime })
+  setTapTempo = () => {
+    this.startAudioCtx()  // Because audio context needs to be created or resumed on user action
+    if (this.tapTempo === undefined) {
+      this.tapTempo = this.audioContext.currentTime
     } else {
+      console.log(this.tapTempo)
       let currentTime = this.audioContext.currentTime
-      let newBPM = Math.round(60.0 / (currentTime - this.state.tapTempo))
+      let newBPM = Math.round(60.0 / (currentTime - this.tapTempo))
       if (newBPM >= this.state.minBpmValue && newBPM <= this.state.maxBpmValue) {
-        this.setState({ tapTempo: currentTime })
+        this.tapTempo = currentTime
         this.setState({BPM: newBPM})
       } else {
-        this.setState({ tapTempo: undefined })
+        this.tapTempo = undefined
       }
     }
   }
@@ -179,7 +178,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
           <NumberSelector defaultNumber={this.state.beatPerMeasure} numbersArray={Array.from({length: 64}, (_, i) => i + 1)} onChange={(value) => {this.onChangeBeatPerMeasure(value)}}/>
           <div style={{fontSize: '12px', marginLeft: '5px'}}>BEATS PER MEASURE</div>
 
-          <IconButton style={{marginLeft: 'auto', marginRight: '20px'}} size="small" aria-label="tap-tempo" onClick={() => {this.setTapTempo()}}>
+          <IconButton style={{marginLeft: 'auto', marginRight: '20px'}} size="small" aria-label="tap-tempo" onClick={this.setTapTempo}>
             <CircleIcon fontSize="large"/>
           </IconButton>
         </div>
@@ -188,7 +187,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
           <NumberSelector defaultNumber={this.state.beatPerTime} numbersArray={Array.from({length: 8}, (_, i) => i + 1)} onChange={(value) => {this.onChangeBeatPerTime(value)}}/>
           <div style={{fontSize: '12px', marginLeft: '5px'}}>BEATS PER TIME</div>
 
-          <IconButton style={{marginLeft: 'auto', marginRight: '20px'}} size="small" aria-label="play-metronome" onClick={() => {this.startStop()}}>
+          <IconButton style={{marginLeft: 'auto', marginRight: '20px'}} size="small" aria-label="play-metronome" onClick={this.startStop}>
             { this.state.isPlaying ? <PauseCircleFilledIcon fontSize="large"/> : <PlayCircleOutlineIcon fontSize="large"/> }
           </IconButton>
         </div>
