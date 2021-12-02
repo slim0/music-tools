@@ -34,7 +34,6 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
   }
 
   componentWillUnmount() {
-    console.log("componentWillUnmount")
     this.audioContext.close()
   }
 
@@ -136,7 +135,6 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
     if (this.tapTempo === undefined) {
       this.tapTempo = this.audioContext.currentTime
     } else {
-      console.log(this.tapTempo)
       let currentTime = this.audioContext.currentTime
       let newBPM = Math.round(60.0 / (currentTime - this.tapTempo))
       if (newBPM >= this.state.minBpmValue && newBPM <= this.state.maxBpmValue) {
