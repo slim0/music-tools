@@ -1,13 +1,14 @@
 import { Button } from '@mui/material'
 import React from 'react'
 
-import autoCorrelate from "./libs/AutoCorrelate";
+import autoCorrelate from "./libs/AutoCorrelate"
 import {
   noteFromPitch,
   centsOffFromPitch,
   getDetunePercent,
-} from "./libs/Helpers";
+} from "./libs/Helpers"
 
+import './Tuner.scss'
 
 class Tuner extends React.Component {
   constructor(props) {
@@ -18,7 +19,9 @@ class Tuner extends React.Component {
     this.source = undefined
     this.mediaStream = undefined
     this.buflen = 2048
-    this.buf = new Float32Array(this.buflen);
+    this.buf = new Float32Array(this.buflen)
+    this.isRunning = false
+
     this.noteStrings = [
       "C",
       "C#",
@@ -35,7 +38,6 @@ class Tuner extends React.Component {
     ]
 
     this.state = {
-      isRunning: false,
       pitch: "0 Hz",
       pitchNote: "C",
       pitchScale: "4",
@@ -44,32 +46,30 @@ class Tuner extends React.Component {
     }
   }
 
-  componentDidUpdate() {
-    setInterval(this.updatePitch, 1)
-  }
-
   updatePitch = (time) => {
-    if (this.isRunning && this.audioContext && this.analyserNode) {
-      this.analyserNode.getFloatTimeDomainData(this.buf)
+    if (this.isRunning && this.audioContext && this.analyser) {
+      this.analyser.getFloatTimeDomainData(this.buf)
       var ac = autoCorrelate(this.buf, this.audioContext.sampleRate)
+      console.log(ac)
       if (ac > -1) {
+        console.log("here2")
         let note = noteFromPitch(ac)
         let sym = this.noteStrings[note % 12]
         let scl = Math.floor(note / 12) - 1
         let dtune = centsOffFromPitch(ac, note)
         this.setState({pitch: parseFloat(ac).toFixed(2) + " Hz"})
-        this.setState({pitchNote: parseFloat(ac).toFixed(2) + " Hz"})
+        this.setState({pitchNote: sym})
         this.setState({pitchScale: scl})
         this.setState({detune: dtune})
         this.setState({notification: false})
 
-        console.log(note, sym, scl, dtune, ac)
+        // console.log(note, sym, scl, dtune, ac)
       }
     }
   }
 
   start = async () => {
-    this.setState({isRunning: true})
+    this.isRunning = true
     if (!this.mediaStream || this.mediaStream.active === false) {
       await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -79,7 +79,9 @@ class Tuner extends React.Component {
           latency: 0,
         },
       }).then((mediaStream) => {this.mediaStream = mediaStream})
-    }
+
+    this.pitchUpdater = setInterval(this.updatePitch, 1)
+  }
 
     if (!this.audioContext || this.audioContext.state === "closed") {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
@@ -98,13 +100,14 @@ class Tuner extends React.Component {
   }
 
   stop = () => {
-    this.setState({isRunning: false})
+    this.isRunning = false
+    this.pitchUpdater && clearInterval(this.pitchUpdater)
     if (this.mediaStream && this.mediaStream.active === true) {
       this.mediaStream.getAudioTracks().forEach(track => {
         track.stop()
       })
     }
-    if (this.audioContext.state !== "closed") {
+    if (this.audioContext && this.audioContext.state !== "closed") {
       this.audioContext.close()
     }
 
@@ -115,9 +118,16 @@ class Tuner extends React.Component {
 
   render() {
     return (
-        <div className="Metronome">
+        <div className="Tuner">
             <Button onClick={this.start}>START</Button>
             <Button onClick={this.stop}>STOP</Button>
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+              <span>Pitch: {this.state.pitch}</span>
+              <span>Note: {this.state.pitchNote}</span>
+              <span>Octave: {this.state.pitchScale}</span>
+              <span>Detune: {this.state.detune}</span>
+              <span>Notification: {this.state.notification}</span>
+            </div>
         </div>
     )
   }
