@@ -42,7 +42,6 @@ class Tuner extends React.Component {
       pitchNote: "C",
       pitchScale: "4",
       detune: "0",
-      notification: false
     }
   }
 
@@ -61,7 +60,6 @@ class Tuner extends React.Component {
         this.setState({pitchNote: sym})
         this.setState({pitchScale: scl})
         this.setState({detune: dtune})
-        this.setState({notification: false})
 
         // console.log(note, sym, scl, dtune, ac)
       }
@@ -126,7 +124,6 @@ class Tuner extends React.Component {
               <span>Note: {this.state.pitchNote}</span>
               <span>Octave: {this.state.pitchScale}</span>
               <span>Detune: {this.state.detune}</span>
-              <span>Notification: {this.state.notification}</span>
             </div>
         </div>
     )
