@@ -34,7 +34,7 @@ class Metronome extends React.Component {  // Thanks to https://github.com/grant
   }
 
   componentWillUnmount() {
-    this.audioContext.close()
+    this.audioContext && this.audioContext.close()
   }
 
   startAudioCtx = () => {

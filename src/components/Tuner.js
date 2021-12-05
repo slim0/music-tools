@@ -45,6 +45,10 @@ class Tuner extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    this.audioContext && this.audioContext.close()
+  }
+
   updatePitch = (time) => {
     if (this.isRunning && this.audioContext && this.analyser) {
       this.analyser.getFloatTimeDomainData(this.buf)

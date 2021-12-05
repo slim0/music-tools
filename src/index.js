@@ -4,11 +4,13 @@ import './index.scss';
 import Metronome  from './components/Metronome';
 import Tuner from './components/Tuner'
 import reportWebVitals from './reportWebVitals';
+import EarTrainer from './components/EarTrainer';
 
 ReactDOM.render(
   <React.StrictMode>
     <Metronome beatPerMeasure={4} beatPerTime={1}/>
     <Tuner></Tuner>
+    <EarTrainer></EarTrainer>
   </React.StrictMode>,
   document.getElementById('root')
 );
